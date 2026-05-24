@@ -4,7 +4,6 @@ body {
     background: radial-gradient(circle at center, #050508, #000);
 }
 
-/* 🌸 деревья */
 #treeRow {
     position: absolute;
     top: -180px;
@@ -15,14 +14,12 @@ body {
     z-index: 1;
     pointer-events: none;
     opacity: 0.9;
-    filter: blur(0.3px);
 }
 
 #treeRow img {
-    width: 500px;
+    width: 600px;
 }
 
-/* 🌙 кнопка */
 #startScreen {
     position: absolute;
     width: 100%;
@@ -41,11 +38,8 @@ body {
     background: rgba(30,30,30,0.8);
     color: white;
     cursor: pointer;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 0 40px rgba(255,255,255,0.1);
 }
 
-/* 🌸 canvas */
 #sakuraCanvas {
     position: absolute;
     top: 0;
@@ -53,7 +47,6 @@ body {
     z-index: 2;
 }
 
-/* 🖼 фото */
 #photosContainer {
     position: absolute;
     width: 100%;
@@ -71,46 +64,14 @@ body {
     bottom: -180px;
     opacity: 0;
 
-    animation: flyPhoto var(--dur, 16s)
-        cubic-bezier(0.22, 1, 0.36, 1)
-        forwards;
-
-    box-shadow:
-        0 0 30px rgba(255,255,255,0.12),
-        0 20px 60px rgba(0,0,0,0.6);
-
-    will-change: transform, opacity, filter;
+    animation: flyPhoto var(--dur, 16s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes flyPhoto {
-
-    0% {
-        opacity: 0;
-        transform: translateY(0px) translateX(0px) scale(0.8) rotate(var(--rot));
-        filter: blur(0px);
-    }
-
-    10% { opacity: 1; }
-
-    30% {
-        opacity: 0.85;
-        filter: blur(0.5px);
-    }
-
-    60% {
-        opacity: 0.4;
-        filter: blur(3px);
-        transform: translateY(-700px) translateX(40px) scale(1.05);
-    }
-
-    100% {
-        opacity: 0;
-        filter: blur(12px);
-        transform: translateY(-1300px) translateX(-30px) scale(1.2);
-    }
+    0% { opacity: 0; transform: translateY(0) scale(0.8) rotate(var(--rot)); }
+    100% { opacity: 0; transform: translateY(-1200px) scale(1.2); }
 }
 
-/* 💬 текст */
 #textContainer {
     position: absolute;
     width: 100%;
@@ -122,62 +83,21 @@ body {
 .memoryText {
     position: absolute;
     max-width: 420px;
-
     font-family: Georgia, serif;
     font-size: 19px;
-    line-height: 1.4;
+    color: rgba(20,20,20,0.92);
 
-    color: rgba(20, 20, 20, 0.92);
-
-    text-shadow:
-        0 2px 12px rgba(0,0,0,0.35),
-        0 0 2px rgba(255,255,255,0.25);
-
-    background: rgba(255, 255, 255, 0.30);
+    background: rgba(255,255,255,0.3);
     backdrop-filter: blur(8px);
 
     padding: 10px 14px;
     border-radius: 12px;
 
-    border: 1px solid rgba(255,255,255,0.2);
-
     opacity: 0;
-
     animation: textFade 7s ease forwards;
 }
 
 @keyframes textFade {
-
-    0% {
-        opacity: 0;
-        transform: translateY(12px) scale(0.98);
-        filter: blur(6px);
-    }
-
-    15% {
-        opacity: 1;
-        transform: translateY(0px) scale(1);
-        filter: blur(0px);
-    }
-
-    70% {
-        opacity: 1;
-        transform: translateY(-2px);
-    }
-
-    100% {
-        opacity: 0;
-        transform: translateY(-18px) scale(1.01);
-        filter: blur(6px);
-    }
-}
-
-.memoryText::after {
-    content: "▍";
-    animation: blink 0.8s infinite;
-    margin-left: 4px;
-}
-
-@keyframes blink {
-    50% { opacity: 0; }
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 0; transform: translateY(-10px); }
 }

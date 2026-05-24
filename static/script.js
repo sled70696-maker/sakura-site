@@ -5,28 +5,31 @@ const photosContainer = document.getElementById("photosContainer");
 const textContainer = document.getElementById("textContainer");
 
 const canvas = document.getElementById("sakuraCanvas");
-const ctx = canvas.getContext("2d");
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+const ctx = canvas ? canvas.getContext("2d") : null;
 
 let started = false;
 let photos = [];
 
-/* 🌳 ТОЛЬКО ДЕРЕВЬЯ (НОВЫЙ БЛОК) */
+/* resize canvas safe */
+function resizeCanvas() {
+    if (!canvas) return;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+resizeCanvas();
+
+/* 🌳 деревья */
 function animateTrees() {
+    const trees = document.getElementById("treeRow");
+    if (!trees) return;
 
     const time = Date.now() * 0.001;
 
-    const swayX = Math.sin(time) * 3;        // лёгкое движение влево-вправо
-    const swayY = Math.cos(time * 0.7) * 1.5; // лёгкое движение вверх-вниз
+    const swayX = Math.sin(time) * 3;
+    const swayY = Math.cos(time * 0.7) * 1.5;
 
-    const trees = document.getElementById("treeRow");
-
-    if (trees) {
-        trees.style.transform =
-            `translate(${swayX}px, ${swayY}px)`;
-    }
+    trees.style.transform = `translate(${swayX}px, ${swayY}px)`;
 
     requestAnimationFrame(animateTrees);
 }
@@ -38,7 +41,7 @@ let petals = [];
 
 function createPetal() {
     return {
-        x: Math.random() * canvas.width,
+        x: Math.random() * window.innerWidth,
         y: -20,
         size: 6 + Math.random() * 10,
         speed: 1 + Math.random() * 2,
@@ -49,6 +52,8 @@ function createPetal() {
 }
 
 function drawPetal(p) {
+    if (!ctx) return;
+
     ctx.save();
     ctx.translate(p.x, p.y);
     ctx.rotate(p.angle);
@@ -65,6 +70,8 @@ function drawPetal(p) {
 }
 
 function animatePetals() {
+    if (!ctx) return;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let p of petals) {
@@ -74,7 +81,8 @@ function animatePetals() {
         drawPetal(p);
     }
 
-    petals = petals.filter(p => p.y < canvas.height + 100);
+    petals = petals.filter(p => p.y < window.innerHeight + 100);
+
     requestAnimationFrame(animatePetals);
 }
 
@@ -83,14 +91,18 @@ animatePetals();
 
 /* 🖼 фото */
 async function loadPhotos() {
-    const res = await fetch("/photos");
-    photos = await res.json();
+    try {
+        const res = await fetch("/photos");
+        photos = await res.json();
+    } catch (e) {
+        console.error("photos load error", e);
+    }
 }
 
 let lastPhotoIndex = -1;
 
 function spawnPhoto() {
-    if (!photos.length) return;
+    if (!photos.length || !photosContainer) return;
 
     let index;
     do {
@@ -118,14 +130,14 @@ function spawnPhoto() {
 
 /* 💬 текст */
 const messages = [
-    "Я помню каждую твою улыбку...",
-    "Ты осталась в моих мыслях",
+    "Твоя улыбка делает мир лучше",
+    "Ты всегда в моих мыслях",
     "Иногда мне кажется, что ты рядом",
-    "Я не умею тебя забывать",
+    "Обожаю твой смех",
     "Ты стала частью меня",
     "Даже тишина напоминает о тебе",
-    "Я не отпустил тебя внутри себя",
-    "Если бы время можно было вернуть..."
+    "Ты самая лучшая моя",
+    "Ты моя самая любимая"
 ];
 
 function typeText(element, text, speed = 35) {
@@ -143,6 +155,8 @@ function typeText(element, text, speed = 35) {
 }
 
 function spawnText() {
+    if (!textContainer) return;
+
     const text = document.createElement("div");
     text.classList.add("memoryText");
 
@@ -159,23 +173,22 @@ function spawnText() {
 }
 
 /* 🚀 старт */
-button.addEventListener("click", async () => {
+if (button) {
+    button.addEventListener("click", async () => {
+        if (started) return;
+        started = true;
 
-    if (started) return;
-    started = true;
+        const screen = document.getElementById("startScreen");
+        if (screen) screen.style.display = "none";
 
-    document.getElementById("startScreen").style.display = "none";
+        if (music) music.play();
 
-    music.play();
+        await loadPhotos();
 
-    await loadPhotos();
+        setInterval(spawnPhoto, 900);
+        setInterval(spawnText, 3200);
+    });
+}
 
-    setInterval(spawnPhoto, 900);
-    setInterval(spawnText, 3200);
-});
-
-/* 📱 resize */
-window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
+/* resize */
+window.addEventListener("resize", resizeCanvas);
