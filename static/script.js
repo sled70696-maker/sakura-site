@@ -5,31 +5,28 @@ const photosContainer = document.getElementById("photosContainer");
 const textContainer = document.getElementById("textContainer");
 
 const canvas = document.getElementById("sakuraCanvas");
-const ctx = canvas ? canvas.getContext("2d") : null;
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 let started = false;
 let photos = [];
 
-/* resize canvas safe */
-function resizeCanvas() {
-    if (!canvas) return;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-
-resizeCanvas();
-
-/* 🌳 деревья */
+/* 🌳 ТОЛЬКО ДЕРЕВЬЯ (НОВЫЙ БЛОК) */
 function animateTrees() {
-    const trees = document.getElementById("treeRow");
-    if (!trees) return;
 
     const time = Date.now() * 0.001;
 
-    const swayX = Math.sin(time) * 3;
-    const swayY = Math.cos(time * 0.7) * 1.5;
+    const swayX = Math.sin(time) * 3;        // лёгкое движение влево-вправо
+    const swayY = Math.cos(time * 0.7) * 1.5; // лёгкое движение вверх-вниз
 
-    trees.style.transform = `translate(${swayX}px, ${swayY}px)`;
+    const trees = document.getElementById("treeRow");
+
+    if (trees) {
+        trees.style.transform =
+            `translate(${swayX}px, ${swayY}px)`;
+    }
 
     requestAnimationFrame(animateTrees);
 }
@@ -41,7 +38,7 @@ let petals = [];
 
 function createPetal() {
     return {
-        x: Math.random() * window.innerWidth,
+        x: Math.random() * canvas.width,
         y: -20,
         size: 6 + Math.random() * 10,
         speed: 1 + Math.random() * 2,
@@ -52,8 +49,6 @@ function createPetal() {
 }
 
 function drawPetal(p) {
-    if (!ctx) return;
-
     ctx.save();
     ctx.translate(p.x, p.y);
     ctx.rotate(p.angle);
@@ -70,8 +65,6 @@ function drawPetal(p) {
 }
 
 function animatePetals() {
-    if (!ctx) return;
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let p of petals) {
@@ -81,8 +74,7 @@ function animatePetals() {
         drawPetal(p);
     }
 
-    petals = petals.filter(p => p.y < window.innerHeight + 100);
-
+    petals = petals.filter(p => p.y < canvas.height + 100);
     requestAnimationFrame(animatePetals);
 }
 
@@ -91,18 +83,14 @@ animatePetals();
 
 /* 🖼 фото */
 async function loadPhotos() {
-    try {
-        const res = await fetch("/photos");
-        photos = await res.json();
-    } catch (e) {
-        console.error("photos load error", e);
-    }
+    const res = await fetch("/photos");
+    photos = await res.json();
 }
 
 let lastPhotoIndex = -1;
 
 function spawnPhoto() {
-    if (!photos.length || !photosContainer) return;
+    if (!photos.length) return;
 
     let index;
     do {
@@ -155,8 +143,6 @@ function typeText(element, text, speed = 35) {
 }
 
 function spawnText() {
-    if (!textContainer) return;
-
     const text = document.createElement("div");
     text.classList.add("memoryText");
 
@@ -173,22 +159,23 @@ function spawnText() {
 }
 
 /* 🚀 старт */
-if (button) {
-    button.addEventListener("click", async () => {
-        if (started) return;
-        started = true;
+button.addEventListener("click", async () => {
 
-        const screen = document.getElementById("startScreen");
-        if (screen) screen.style.display = "none";
+    if (started) return;
+    started = true;
 
-        if (music) music.play();
+    document.getElementById("startScreen").style.display = "none";
 
-        await loadPhotos();
+    music.play();
 
-        setInterval(spawnPhoto, 900);
-        setInterval(spawnText, 3200);
-    });
-}
+    await loadPhotos();
 
-/* resize */
-window.addEventListener("resize", resizeCanvas);
+    setInterval(spawnPhoto, 900);
+    setInterval(spawnText, 3200);
+});
+
+/* 📱 resize */
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});                                                                                                                                        
